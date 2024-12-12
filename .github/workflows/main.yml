@@ -29,8 +29,6 @@ jobs:
         python -m pip install --upgrade pip
         pip install buildozer==1.5.0
         pip install cython==0.29.33
-        pip install --upgrade urllib3
-        pip install requests
 
     - name: Install system dependencies
       run: |
@@ -52,55 +50,58 @@ jobs:
             libavcodec-dev \
             zlib1g-dev
 
-    - name: Setup Android SDK
+    - name: Set up Android SDK
+      uses: android-actions/setup-android@v3
+      with:
+        cmdline-tools-version: '9477386'
+
+    - name: Install Android SDK components
       run: |
-        # Create base directory
-        mkdir -p $HOME/.buildozer/android/platform/android-sdk
+        yes | sdkmanager --licenses
+        sdkmanager "platform-tools" "platforms;android-33" "build-tools;33.0.0"
 
-        # Download and extract SDK tools
-        cd $HOME/.buildozer/android/platform/android-sdk
-        curl -o commandlinetools.zip https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip
-        unzip -q commandlinetools.zip
-        rm commandlinetools.zip
-
-        # Create proper directory structure
-        mkdir -p cmdline-tools/tools
-        mv cmdline-tools/* cmdline-tools/tools/ || true
-        rm -rf cmdline-tools/tools/cmdline-tools
-
-        # Set SDK path and install required packages
-        export ANDROID_SDK_ROOT=$HOME/.buildozer/android/platform/android-sdk
-        export PATH=$ANDROID_SDK_ROOT/cmdline-tools/tools/bin:$PATH
-
-        # Accept licenses and install packages
-        yes | sdkmanager --licenses --sdk_root=$ANDROID_SDK_ROOT
-        sdkmanager --sdk_root=$ANDROID_SDK_ROOT "platform-tools" "platforms;android-33" "build-tools;33.0.0"
-
-    - name: Setup Android NDK
+    - name: Download Android NDK
       run: |
-        cd $HOME/.buildozer/android/platform
-        curl -o android-ndk.zip https://dl.google.com/android/repository/android-ndk-r25b-linux.zip
-        unzip -q android-ndk.zip
-        rm android-ndk.zip
+        mkdir -p $HOME/.buildozer/android/platform/
+        cd $HOME/.buildozer/android/platform/
+        wget -q https://dl.google.com/android/repository/android-ndk-r25b-linux.zip
+        unzip -q android-ndk-r25b-linux.zip
+        mv android-ndk-r25b android-ndk-r25b
+        rm android-ndk-r25b-linux.zip
 
-    - name: Set environment variables
+    - name: Create buildozer.spec
       run: |
-        echo "ANDROID_HOME=$HOME/.buildozer/android/platform/android-sdk" >> $GITHUB_ENV
-        echo "ANDROID_SDK_ROOT=$HOME/.buildozer/android/platform/android-sdk" >> $GITHUB_ENV
-        echo "ANDROID_NDK_HOME=$HOME/.buildozer/android/platform/android-ndk-r25b" >> $GITHUB_ENV
-        echo "$HOME/.buildozer/android/platform/android-sdk/cmdline-tools/tools/bin" >> $GITHUB_PATH
-        echo "$HOME/.buildozer/android/platform/android-sdk/platform-tools" >> $GITHUB_PATH
-        echo "$HOME/.buildozer/android/platform/android-sdk/build-tools/33.0.0" >> $GITHUB_PATH
-
-    - name: Verify Android SDK installation
-      run: |
-        ls -la $HOME/.buildozer/android/platform/android-sdk/cmdline-tools/tools/bin/
-        $HOME/.buildozer/android/platform/android-sdk/cmdline-tools/tools/bin/sdkmanager --version
+        cat > buildozer.spec << EOF
+        [app]
+        title = Bierwiegen
+        package.name = bierwiegen
+        package.domain = org.bierwiegen
+        source.dir = .
+        source.include_exts = py,png,jpg,kv,atlas
+        version = 1.0
+        requirements = python3,kivy==2.1.0
+        orientation = portrait
+        fullscreen = 0
+        android.permissions = INTERNET
+        android.api = 33
+        android.minapi = 21
+        android.ndk = r25b
+        android.ndk_path = $HOME/.buildozer/android/platform/android-ndk-r25b
+        android.sdk_path = $ANDROID_SDK_ROOT
+        android.build_tools = 33.0.0
+        android.accept_sdk_license = True
+        android.gradle_dependencies = org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.8.0
+        android.skip_update = True
+        [buildozer]
+        log_level = 2
+        warn_on_root = 1
+        EOF
 
     - name: Build with Buildozer
       env:
         BUILDOZER_WARN_ON_ROOT: 0
       run: |
+        export PATH=$ANDROID_SDK_ROOT/platform-tools:$ANDROID_SDK_ROOT/build-tools/33.0.0:$PATH
         buildozer android debug
 
     - name: Upload APK
