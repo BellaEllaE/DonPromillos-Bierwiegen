@@ -13,11 +13,13 @@ fullscreen = 0
 
 android.permissions = INTERNET
 
-android.api = 31
+# Aktualisierte Android-Konfiguration
+android.api = 33
 android.minapi = 21
-android.ndk = 25b
-android.sdk = 31
-android.gradle_dependencies = org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.3.50
+android.ndk = 25.2.9519653
+android.sdk = 33
+android.build_tools = 33.0.0
+android.gradle_dependencies = org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.8.0
 
 [buildozer]
 log_level = 2
