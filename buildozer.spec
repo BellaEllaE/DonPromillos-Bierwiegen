@@ -19,7 +19,11 @@ android.minapi = 21
 android.ndk = 25b
 android.ndk_path = ${ANDROID_NDK_HOME}
 android.build_tools = 33.0.0
+android.accept_sdk_license = True
 android.gradle_dependencies = org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.8.0
+
+# Build tools path
+android.aidl = ${ANDROID_HOME}/build-tools/33.0.0/aidl
 
 [buildozer]
 log_level = 2
