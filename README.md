@@ -11,7 +11,7 @@ Für IOS bitte eine Web-Version verwenden.
 
 ## Spielanleitung
 1. Mindestens 2 Spieler hinzufügen
-2. Startgewichte der Gläser eingeben
+2. Startgewichte der Biere eingeben
 3. Zielgewicht festlegen
 4. Trinken!
 5. Neue Gewichte eingeben
