@@ -16,11 +16,10 @@ android.permissions = INTERNET
 # Aktualisierte Android-Konfiguration
 android.api = 33
 android.minapi = 21
-android.ndk = 25.2.9519653
+android.ndk = 25b
+android.ndk_path = ${ANDROID_NDK_HOME}
 android.build_tools = 33.0.0
 android.gradle_dependencies = org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.8.0
-
-# Entfernt: android.sdk, da es veraltet ist
 
 [buildozer]
 log_level = 2
