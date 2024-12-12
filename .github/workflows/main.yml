@@ -50,9 +50,13 @@ jobs:
             libavcodec-dev \
             zlib1g-dev
 
-    - name: Accept Android SDK licenses
+    - name: Set up Android SDK
       run: |
-        yes | /usr/local/lib/android/sdk/cmdline-tools/latest/bin/sdkmanager --licenses
+        echo "Checking SDK Manager location..."
+        ls -la /usr/local/lib/android/sdk/cmdline-tools/latest/bin/
+        echo "Accepting licenses..."
+        yes | /usr/local/lib/android/sdk/cmdline-tools/latest/bin/sdkmanager --licenses || true
+        echo "Installing SDK components..."
         /usr/local/lib/android/sdk/cmdline-tools/latest/bin/sdkmanager "platforms;android-33" "build-tools;33.0.0"
 
     - name: Create buildozer.spec
@@ -83,20 +87,13 @@ jobs:
         warn_on_root = 1
         EOF
 
-    - name: Debug Environment
-      run: |
-        echo "ANDROID_SDK_ROOT: $ANDROID_SDK_ROOT"
-        echo "ANDROID_HOME: $ANDROID_HOME"
-        echo "ANDROID_NDK_HOME: $ANDROID_NDK_HOME"
-        ls -la /usr/local/lib/android/sdk/
-        ls -la /usr/local/lib/android/sdk/ndk/
-        ls -la /usr/local/lib/android/sdk/cmdline-tools/latest/bin/
-
     - name: Build with Buildozer
       env:
         BUILDOZER_WARN_ON_ROOT: 0
+        ANDROID_HOME: /usr/local/lib/android/sdk
+        ANDROID_SDK_ROOT: /usr/local/lib/android/sdk
+        ANDROID_NDK_HOME: /usr/local/lib/android/sdk/ndk/27.2.12479018
       run: |
-        export PATH=$PATH:/usr/local/lib/android/sdk/platform-tools:/usr/local/lib/android/sdk/build-tools/33.0.0
         buildozer android debug
 
     - name: Upload APK
