@@ -50,24 +50,10 @@ jobs:
             libavcodec-dev \
             zlib1g-dev
 
-    - name: Set up Android SDK
-      uses: android-actions/setup-android@v3
-      with:
-        cmdline-tools-version: '9477386'
-
-    - name: Install Android SDK components
+    - name: Accept Android SDK licenses
       run: |
-        yes | sdkmanager --licenses
-        sdkmanager "platform-tools" "platforms;android-33" "build-tools;33.0.0"
-
-    - name: Download Android NDK
-      run: |
-        mkdir -p $HOME/.buildozer/android/platform
-        cd $HOME/.buildozer/android/platform
-        wget -q https://dl.google.com/android/repository/android-ndk-r25b-linux.zip
-        unzip -q android-ndk-r25b-linux.zip
-        rm android-ndk-r25b-linux.zip
-        echo "NDK_PATH=$HOME/.buildozer/android/platform/android-ndk-r25b" >> $GITHUB_ENV
+        yes | /usr/local/lib/android/sdk/cmdline-tools/latest/bin/sdkmanager --licenses
+        /usr/local/lib/android/sdk/cmdline-tools/latest/bin/sdkmanager "platforms;android-33" "build-tools;33.0.0"
 
     - name: Create buildozer.spec
       run: |
@@ -85,9 +71,9 @@ jobs:
         android.permissions = INTERNET
         android.api = 33
         android.minapi = 21
-        android.ndk = r25b
-        android.ndk_path = $NDK_PATH
-        android.sdk_path = $ANDROID_SDK_ROOT
+        android.ndk = 27.2.12479018
+        android.ndk_path = /usr/local/lib/android/sdk/ndk/27.2.12479018
+        android.sdk_path = /usr/local/lib/android/sdk
         android.build_tools = 33.0.0
         android.accept_sdk_license = True
         android.gradle_dependencies = org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.8.0
@@ -97,18 +83,20 @@ jobs:
         warn_on_root = 1
         EOF
 
-    - name: Debug Paths
+    - name: Debug Environment
       run: |
         echo "ANDROID_SDK_ROOT: $ANDROID_SDK_ROOT"
-        echo "NDK_PATH: $NDK_PATH"
-        ls -la $HOME/.buildozer/android/platform/
-        ls -la $ANDROID_SDK_ROOT
+        echo "ANDROID_HOME: $ANDROID_HOME"
+        echo "ANDROID_NDK_HOME: $ANDROID_NDK_HOME"
+        ls -la /usr/local/lib/android/sdk/
+        ls -la /usr/local/lib/android/sdk/ndk/
+        ls -la /usr/local/lib/android/sdk/cmdline-tools/latest/bin/
 
     - name: Build with Buildozer
       env:
         BUILDOZER_WARN_ON_ROOT: 0
       run: |
-        export PATH=$ANDROID_SDK_ROOT/platform-tools:$ANDROID_SDK_ROOT/build-tools/33.0.0:$PATH
+        export PATH=$PATH:/usr/local/lib/android/sdk/platform-tools:/usr/local/lib/android/sdk/build-tools/33.0.0
         buildozer android debug
 
     - name: Upload APK
