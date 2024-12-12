@@ -1,0 +1,219 @@
+# drinkinggame.kv
+<PlayerScreen>:
+    BoxLayout:
+        orientation: 'vertical'
+        padding: 20
+        spacing: 10
+
+        ScrollView:
+            do_scroll_x: False
+            do_scroll_y: True
+            
+            BoxLayout:
+                orientation: 'vertical'
+                size_hint_y: None
+                height: self.minimum_height
+                spacing: 10
+
+                # Bild und Titel
+                BoxLayout:
+                    orientation: 'vertical'
+                    size_hint_y: None
+                    height: '250dp'  # Gesamthöhe erhöht
+                    spacing: 10      # Abstand zwischen den Elementen
+                    
+                    Image:
+                        source: 'assets/Logo.jpg'
+                        size_hint_y: None
+                        height: '150dp'
+                        allow_stretch: True
+                        keep_ratio: True
+
+                    Label:
+                        text: 'Don Promillos\nBierwiegen'
+                        font_size: '32sp'
+                        size_hint_y: None
+                        height: '80dp'  # Höhe für zwei Textzeilen
+
+                Label:
+                    text: 'Spielername:'
+                    size_hint_y: None
+                    height: '40dp'
+
+                TextInput:
+                    id: player_name
+                    size_hint_y: None
+                    height: '40dp'
+                    multiline: False
+                    on_text_validate: root.add_player(self.text)
+
+                Button:
+                    text: 'Spieler hinzufügen'
+                    size_hint_y: None
+                    height: '40dp'
+                    on_release: root.add_player(player_name.text)
+
+                Label:
+                    text: 'Spielerliste:'
+                    size_hint_y: None
+                    height: '40dp'
+
+                BoxLayout:
+                    id: player_list
+                    orientation: 'vertical'
+                    size_hint_y: None
+                    height: self.minimum_height
+                    spacing: 5
+
+                Button:
+                    text: 'Spiel beginnen'
+                    size_hint_y: None
+                    height: '40dp'
+                    on_release: 
+                        if root.start_game(): app.root.current = 'weight'
+
+<WeightScreen>:
+    BoxLayout:
+        orientation: 'vertical'
+        padding: 20
+        spacing: 10
+
+        Label:
+            text: f'Startgewicht für {root.current_player_name} (in Gramm):'
+
+        TextInput:
+            id: weight_input
+            multiline: False
+
+        Button:
+            text: 'Weiter'
+            on_release: root.save_weight(weight_input.text)
+
+<OverviewScreen>:
+    BoxLayout:
+        orientation: 'vertical'
+        padding: 20
+        spacing: 15  # Größerer Abstand zwischen den Elementen
+
+        Label:
+            text: 'Spielerübersicht:'
+            size_hint_y: None
+            height: '50dp'
+            font_size: '24sp'
+            bold: True
+
+        ScrollView:
+            BoxLayout:
+                id: overview_box
+                orientation: 'vertical'
+                size_hint_y: None
+                height: self.minimum_height
+                spacing: 15  # Größerer Abstand zwischen den Spielern
+
+        Button:
+            text: 'Zielgewicht'
+            size_hint_y: None
+            height: '50dp'
+            font_size: '18sp'
+            on_release: app.root.current = 'drinking'
+
+        Button:
+            text: 'Spiel beenden'
+            size_hint_y: None
+            height: '50dp'
+            font_size: '18sp'
+            on_release: root.end_game()
+<DrinkingScreen>:
+    BoxLayout:
+        orientation: 'vertical'
+        padding: 20
+        spacing: 10
+
+        # Zielgewicht-Anzeige (immer sichtbar am oberen Rand)
+        Label:
+            size_hint_y: None
+            height: '40dp'
+            text: f'Zielgewicht: {root.target_weight}g' if root.target_weight > 0 else ''
+            
+        # Eingabebereich
+        BoxLayout:
+            id: input_area
+            orientation: 'vertical'
+            spacing: 10
+            
+            Label:
+                text: 'Zielgewicht eingeben (in Gramm):'
+                size_hint_y: None
+                height: '40dp'
+
+            TextInput:
+                id: target_weight
+                multiline: False
+                size_hint_y: None
+                height: '40dp'
+
+            Button:
+                text: 'Start'
+                size_hint_y: None
+                height: '40dp'
+                on_release: root.start_drinking(target_weight.text)
+
+        # Trinken-Label (wird nach Start angezeigt)
+        Label:
+            id: drink_label
+            font_size: '24sp'
+            text: ''
+
+<NewWeightScreen>:
+    BoxLayout:
+        orientation: 'vertical'
+        padding: 20
+        spacing: 10
+
+        # Zielgewicht-Anzeige
+        Label:
+            size_hint_y: None
+            height: '40dp'
+            text: f'Zielgewicht: {root.target_weight}g'
+
+        Label:
+            text: f'Neues Gewicht für {root.current_player_name} (in Gramm):'
+            size_hint_y: None
+            height: '40dp'
+
+        TextInput:
+            id: new_weight
+            multiline: False
+            size_hint_y: None
+            height: '40dp'
+
+        Button:
+            text: 'Weiter'
+            size_hint_y: None
+            height: '40dp'
+            on_release: root.save_new_weight(new_weight.text)
+
+
+<EndScreen>:
+    BoxLayout:
+        orientation: 'vertical'
+        padding: 20
+        spacing: 10
+
+        Label:
+            id: winner_label
+            font_size: '24sp'
+            size_hint_y: 0.6
+            text_size: self.size
+            halign: 'center'
+            valign: 'middle'
+
+        Button:
+            text: 'Neues Spiel'
+            size_hint_y: 0.2
+            on_release: root.new_game()
+
+        Button:
+            text: 'App beenden'
+            size_hint_y: 0.2
+            on_release: root.quit_app()
