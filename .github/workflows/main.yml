@@ -50,42 +50,39 @@ jobs:
             libavcodec-dev \
             zlib1g-dev
 
-    - name: Setup Android SDK
+    - name: Create build directory structure
       run: |
-        # Create directories
-        mkdir -p ${GITHUB_WORKSPACE}/android-sdk/cmdline-tools
-        cd ${GITHUB_WORKSPACE}/android-sdk/cmdline-tools
+        mkdir -p $HOME/.buildozer/android/platform
+        mkdir -p $HOME/.buildozer/android/platform/android-sdk
+        mkdir -p $HOME/.buildozer/android/platform/android-ndk-r25b
 
-        # Download and unzip SDK tools
+    - name: Download and setup Android SDK
+      run: |
         wget -q https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip
         unzip -q commandlinetools-linux-9477386_latest.zip
-        mv cmdline-tools latest
+        mkdir -p $HOME/.buildozer/android/platform/android-sdk/cmdline-tools
+        mv cmdline-tools $HOME/.buildozer/android/platform/android-sdk/cmdline-tools/latest
+        export PATH=$HOME/.buildozer/android/platform/android-sdk/cmdline-tools/latest/bin:$PATH
+        yes | sdkmanager --licenses --sdk_root=$HOME/.buildozer/android/platform/android-sdk
+        sdkmanager --sdk_root=$HOME/.buildozer/android/platform/android-sdk "platforms;android-33" "build-tools;33.0.0" "platform-tools"
 
-        # Set environment variables
-        echo "ANDROID_HOME=${GITHUB_WORKSPACE}/android-sdk" >> $GITHUB_ENV
-        echo "${GITHUB_WORKSPACE}/android-sdk/cmdline-tools/latest/bin" >> $GITHUB_PATH
-        
-        # Wait for environment variables to be set
-        sleep 5
-        
-        # Install SDK packages
-        ${GITHUB_WORKSPACE}/android-sdk/cmdline-tools/latest/bin/sdkmanager --sdk_root=${GITHUB_WORKSPACE}/android-sdk "platform-tools" "platforms;android-33" "build-tools;33.0.0"
-        ${GITHUB_WORKSPACE}/android-sdk/cmdline-tools/latest/bin/sdkmanager --sdk_root=${GITHUB_WORKSPACE}/android-sdk --licenses
-
-    - name: Download NDK
+    - name: Download and setup Android NDK
       run: |
-        cd ${GITHUB_WORKSPACE}/android-sdk
         wget -q https://dl.google.com/android/repository/android-ndk-r25b-linux.zip
         unzip -q android-ndk-r25b-linux.zip
-        mkdir -p ndk
-        mv android-ndk-r25b ndk/25b
-        echo "ANDROID_NDK_HOME=${GITHUB_WORKSPACE}/android-sdk/ndk/25b" >> $GITHUB_ENV
+        mv android-ndk-r25b/* $HOME/.buildozer/android/platform/android-ndk-r25b/
+        rm -rf android-ndk-r25b
+
+    - name: Set environment variables
+      run: |
+        echo "ANDROID_HOME=$HOME/.buildozer/android/platform/android-sdk" >> $GITHUB_ENV
+        echo "ANDROID_NDK_HOME=$HOME/.buildozer/android/platform/android-ndk-r25b" >> $GITHUB_ENV
+        echo "PATH=$HOME/.buildozer/android/platform/android-sdk/platform-tools:$PATH" >> $GITHUB_ENV
 
     - name: Build with Buildozer
       env:
         BUILDOZER_WARN_ON_ROOT: 0
       run: |
-        export PATH=$PATH:${ANDROID_HOME}/build-tools/33.0.0
         buildozer android debug
 
     - name: Upload APK
