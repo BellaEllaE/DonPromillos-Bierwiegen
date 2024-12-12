@@ -1,6 +1,7 @@
 # Don Promillos Bierwiegen
 
-Eine Android-App für das beliebte Trinkspiel "Bierwiegen"
+Eine Android-App für das beliebte Trinkspiel "Bierwiegen". Diese Version ist für Android geräte offline verfügbar. 
+Für IOS bitte eine Web-Version verwenden. 
 
 ## Download & Installation
 1. [Hier klicken für den Download der neuesten Version](../../releases/latest)
