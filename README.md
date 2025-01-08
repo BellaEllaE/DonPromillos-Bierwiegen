@@ -1,5 +1,7 @@
 # Don Promillos Bierwiegen
 
+Ist derzeit in Arbeit für eine Web-basierte Version
+
 Eine Python-App für das beliebte Trinkspiel "Bierwiegen". Braucht Kivy-library.
 
 ## Spielanleitung
